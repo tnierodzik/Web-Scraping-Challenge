@@ -1,28 +1,32 @@
 from splinter import Browser
 from bs4 import BeautifulSoup
 import pandas as pd
-
+import time
 
 def init_browser():
   executable_path = {'executable_path': 'chromedriver.exe'}
-  browser = Browser('chrome', **executable_path)
+  return Browser('chrome', **executable_path)
 
 
 def scrape():
   
+  browser = init_browser()
+
   # Visit Mars News site 
-  browser.visit('https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest')
+  browser.visit('https://mars.nasa.gov/news/')
 
   html_news = browser.html
 
-  soup_news = BeautifulSoup(html_news, 'html.parser')
+  soup = BeautifulSoup(html_news, 'html.parser')
 
-  title_results = soup_news.find_all('div', class_='content_title')
-  para_results = soup_news.find_all('div', class_='article_teaser_body')
-
+  title_results = soup.find_all('div', class_='content_title')
   news_title = title_results[1].text
-  news_para = para_results[0].text
 
+  para_results = soup.find_all('div', class_='article_teaser_body')
+
+  time.sleep(2)
+
+  news_para = para_results[0].text
 
   # Visit JPL site for featured Mars image
   browser.visit('https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars')
@@ -49,9 +53,7 @@ def scrape():
 
   mars_table_df.set_index('Description', inplace=True)
 
-  mars_table_df.head()
-
-  html_table = df.to_html()
+  html_table = mars_table_df.to_html()
 
   # Visit USGS Astrogeology Site
   browser.visit('https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars')
